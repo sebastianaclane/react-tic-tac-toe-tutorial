@@ -2,43 +2,58 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends Component {
-    // We Delete the constructor from Square because Square no longer keeps track of the game’s state since that is what Board does: 
-    // constructor(props) {
-    //   // In JavaScript classes, you need to always call super when defining the constructor of a subclass. All React component classes that have a constructor should start it with a super(props) call.
-    //   super(props);
-    //   // To “remember” things, components use state.
-    //   this.state = {
-    //     value: null
-    //   }
-    // }
+  function calculateWinner(squares) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return squares[a]
+      }
+    } 
+    return null;
+  }
 
-    render() {
-      return (
-        // Notice how with onClick={() => alert('click')}, we’re passing a function as the onClick prop. It only fires after a click. Forgetting () => and writing onClick={alert('click')} is a common mistake, and would fire the alert every time the component re-renders.
-
-        // By calling this.setState from an onClick handler in the Square’s render method, we tell React to re-render that Square whenever its <button> is clicked. After the update, the Square’s this.state.value will be 'X', so we’ll see the X on the game board. If you click on any Square, an X should show up.
-        // When you call setState in a component, React automatically updates the child components inside of it too.
-        <button 
-              className="square" 
-              onClick={() => this.props.onClick()}
-              // onClick={() => this.setState({value: 'X'})}
-        >
-          {this.props.value}
-        </button>
-      );
-    }
+  function Square(props) {
+    // in a function component we don’t need to worry about this.
+    // so instead of this.props.onClick or this.props.value use props.onClick and props.value
+    return (
+      <button className="square" onClick={props.onClick}>
+        {props.value}
+      </button>
+    );
   }
   
   class Board extends Component {
-  // the best approach is to store the game’s state in the parent Board component instead of in each Square. The Board component can tell each Square what to display by passing a prop
-
     constructor(props) {
       super(props);
 
       this.state = {
-        squares: Array(9).fill(null)
+        squares: Array(9).fill(null),
+        xIsNext: true
       }
+    }
+
+    handleClick(i) {
+      // we use .slice() below to modify a copied version of the array instead of the existing array
+      const squares = this.state.squares.slice();
+      // this if statement will return and stop actions of the game early by ignoring the click if someone has won the game or if a square is already filled
+      if (calculateWinner(squares) || squares[i]) {
+        return;
+      }
+      squares[i] = this.state.xIsNext ? 'X' : 'O';
+      this.setState({
+        squares: squares,
+        xIsNext: !this.state.xIsNext
+      });
     }
 
     renderSquare(i) {
@@ -49,8 +64,14 @@ class Square extends Component {
     }
   
     render() {
-      const status = 'Next player: X';
-  
+      const winner = calculateWinner(this.state.squares);
+      let status;
+      if (winner) {
+        status = 'Winner: ' + winner;
+      } else {
+        status = 'Next player: ' + (this.state.xIsNext ? 'X' : '0');
+      }
+
       return (
         <div>
           <div className="status">{status}</div>
@@ -96,4 +117,3 @@ class Square extends Component {
     <Game />,
     document.getElementById('root')
   );
-  
