@@ -3,14 +3,15 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 class Square extends Component {
-    constructor(props) {
-      // In JavaScript classes, you need to always call super when defining the constructor of a subclass. All React component classes that have a constructor should start it with a super(props) call.
-      super(props);
-      // To “remember” things, components use state.
-      this.state = {
-        value: null
-      }
-    }
+    // We Delete the constructor from Square because Square no longer keeps track of the game’s state since that is what Board does: 
+    // constructor(props) {
+    //   // In JavaScript classes, you need to always call super when defining the constructor of a subclass. All React component classes that have a constructor should start it with a super(props) call.
+    //   super(props);
+    //   // To “remember” things, components use state.
+    //   this.state = {
+    //     value: null
+    //   }
+    // }
 
     render() {
       return (
@@ -20,17 +21,31 @@ class Square extends Component {
         // When you call setState in a component, React automatically updates the child components inside of it too.
         <button 
               className="square" 
-              onClick={() => this.setState({value: 'X'})}
+              onClick={() => this.props.onClick()}
+              // onClick={() => this.setState({value: 'X'})}
         >
-          {this.state.value}
+          {this.props.value}
         </button>
       );
     }
   }
   
   class Board extends Component {
+  // the best approach is to store the game’s state in the parent Board component instead of in each Square. The Board component can tell each Square what to display by passing a prop
+
+    constructor(props) {
+      super(props);
+
+      this.state = {
+        squares: Array(9).fill(null)
+      }
+    }
+
     renderSquare(i) {
-      return <Square value={i} />;
+      return <Square
+                    value={this.state.squares[i]}
+                    onClick={() => this.handleClick(i)}
+              />
     }
   
     render() {
